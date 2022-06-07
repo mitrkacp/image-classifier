@@ -5,7 +5,7 @@ import os
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def main():
-    model_trainer = ModelTrainer(DIR_PATH)
+    model_trainer = ModelTrainer(DIR_PATH, n_epochs=10)
     model_trainer.train()
 
 

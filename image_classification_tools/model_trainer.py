@@ -14,16 +14,16 @@ from keras.preprocessing.image import ImageDataGenerator
 
 
 class ModelTrainer:
-    def __init__(self, path, img_size=[224, 224]):
+    def __init__(self, path, img_size=[224, 224], n_epochs=100):
         self.base_path = path
         self.image_size = img_size
         self.training_path = f"{path}\\dataset\\Train"
         self.validation_path = f"{path}\\dataset\\Validation"
         self.base_model = InceptionV3(input_shape=self.image_size + [3], weights='imagenet', include_top=False)
-        self.folders = glob(f"{path}\\dataset\\Train\\*")
+        self.classes = glob(f"{path}\\dataset\\Train\\*")
+        self.epochs = n_epochs
 
     def train(self):
-
         # freeze existing weights to not train them
         for layer in self.base_model.layers:
             layer.trainable = False
@@ -31,7 +31,7 @@ class ModelTrainer:
         # add own output layers
         x = Flatten()(self.base_model.output)
 
-        prediction = Dense(len(self.folders), activation='softmax')(x)
+        prediction = Dense(len(self.classes), activation='softmax')(x)
 
         # create a model object
         model = Model(inputs=self.base_model.input, outputs=prediction)
@@ -66,7 +66,7 @@ class ModelTrainer:
         r = model.fit_generator(
             training_set,
             validation_data=validation_set,
-            epochs=10,
+            epochs=self.epochs,
             steps_per_epoch=len(training_set),
             validation_steps=len(validation_set)
         )
