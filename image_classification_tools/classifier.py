@@ -1,18 +1,15 @@
-import tensorflow.keras
+import keras
 import cv2
 import numpy as np
 import os
-
-# os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
 
 class Classifier:
     def __init__(self, path):
         self.basepath = path
         self.labels_path = f"{path}/dataset/labels.txt"
-        self.model_path = f"{path}/model/keras_model2.h5"
+        self.model_path = f"{path}/model/fruits.h5"
         self.classes = self.read_labels(self.labels_path)
-        self.model = tensorflow.keras.models.load_model(self.model_path)
+        self.model = keras.models.load_model(self.model_path)
 
     def read_labels(self, path):
         # open input file label.txt
@@ -56,16 +53,4 @@ class Classifier:
 
         label = self.classes[class_number] + " " + str(confidence[class_number]) + "%"
 
-        # cv2.putText(img, label, (25, 25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
-
         return label
-        # cv2.putText(
-        #     img=img,
-        #     text=label,
-        #     org=(25, 25),
-        #     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-        #     fontScale=1.0,
-        #     color=(0, 255, 0)
-        # )
-        # cv2.imshow("Image", img)
-        # cv2.waitKey(0)

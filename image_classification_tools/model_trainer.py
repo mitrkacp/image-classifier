@@ -1,7 +1,6 @@
 from keras.layers import Input, Lambda, Dense, Flatten
 from keras.models import Model
 from keras.applications.inception_v3 import InceptionV3
-# from keras.applications.vgg16 import VGG16
 from keras.applications.inception_v3 import preprocess_input
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator, load_img
@@ -19,25 +18,20 @@ class ModelTrainer:
         self.base_path = path
         self.image_size = img_size
         self.training_path = f"{path}\\dataset\\Train"
-        self.validation_path = f"{path}\\dataset\\Test"
+        self.validation_path = f"{path}\\dataset\\Validation"
         self.base_model = InceptionV3(input_shape=self.image_size + [3], weights='imagenet', include_top=False)
-        self.folders = glob(f"{path}\\dataset\\Test\\*")
+        self.folders = glob(f"{path}\\dataset\\Train\\*")
 
-    def train_model(self):
+    def train(self):
 
-        # don't train existing weights
+        # freeze existing weights to not train them
         for layer in self.base_model.layers:
             layer.trainable = False
 
-        # useful for getting number of output classes
-        folders = self.folders
-
-
-        # our layers - you can add more if you want
+        # add own output layers
         x = Flatten()(self.base_model.output)
 
-        prediction = Dense(len(folders), activation='softmax')(x)
-
+        prediction = Dense(len(self.folders), activation='softmax')(x)
 
         # create a model object
         model = Model(inputs=self.base_model.input, outputs=prediction)
@@ -45,13 +39,12 @@ class ModelTrainer:
         # view the structure of the model
         model.summary()
 
-        # tell the model what cost and optimization method to use
-        model.compile(
-            loss='categorical_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy']
-        )
+        # compile model and set cost and optimization method
+        model.compile(loss='categorical_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
 
+        # generate more data
         train_datagen = ImageDataGenerator(rescale=1. / 255,
                                            shear_range=0.2,
                                            zoom_range=0.2,
@@ -59,27 +52,23 @@ class ModelTrainer:
 
         test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-        # Make sure you provide the same target size as initialied for the image size
         training_set = train_datagen.flow_from_directory(self.training_path,
                                                          target_size=(224, 224),
                                                          batch_size=8,
                                                          class_mode='categorical')
 
-        test_set = test_datagen.flow_from_directory(self.validation_path,
+        validation_set = test_datagen.flow_from_directory(self.validation_path,
                                                     target_size=(224, 224),
                                                     batch_size=8,
                                                     class_mode='categorical')
 
         # fit the model
-        # Run the cell. It will take some time to execute
-        print(len(training_set))
-        print(len(test_set))
         r = model.fit_generator(
             training_set,
-            validation_data=test_set,
+            validation_data=validation_set,
             epochs=10,
             steps_per_epoch=len(training_set),
-            validation_steps=len(test_set)
+            validation_steps=len(validation_set)
         )
 
         # plot the loss
@@ -96,6 +85,5 @@ class ModelTrainer:
         plt.show()
         # plt.savefig('AccVal_acc.png')
 
-        # save it as a h5 file
-
+        # save model as a h5 file
         model.save(self.base_path + '/model/output_model.h5')
