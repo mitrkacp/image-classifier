@@ -32,6 +32,8 @@ class ModelTrainer:
         x = Flatten()(self.base_model.output)
 
         prediction = Dense(len(self.classes), activation='softmax')(x)
+        print( f'x: {x}')
+        print( f'prediction: {prediction}')
 
         # create a model object
         model = Model(inputs=self.base_model.input, outputs=prediction)
@@ -63,7 +65,7 @@ class ModelTrainer:
                                                     class_mode='categorical')
 
         # fit the model
-        r = model.fit_generator(
+        result = model.fit_generator(
             training_set,
             validation_data=validation_set,
             epochs=self.epochs,
@@ -72,15 +74,15 @@ class ModelTrainer:
         )
 
         # plot the loss
-        plt.plot(r.history['loss'], label='train loss')
-        plt.plot(r.history['val_loss'], label='val loss')
+        plt.plot(result.history['loss'], label='train loss')
+        plt.plot(result.history['val_loss'], label='val loss')
         plt.legend()
         plt.show()
         # plt.savefig('LossVal_loss.png')
 
         # plot the accuracy
-        plt.plot(r.history['accuracy'], label='train acc')
-        plt.plot(r.history['val_accuracy'], label='val acc')
+        plt.plot(result.history['accuracy'], label='train acc')
+        plt.plot(result.history['val_accuracy'], label='val acc')
         plt.legend()
         plt.show()
         # plt.savefig('AccVal_acc.png')
