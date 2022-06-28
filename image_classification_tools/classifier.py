@@ -7,7 +7,7 @@ class Classifier:
     def __init__(self, path):
         self.basepath = path
         self.labels_path = f"{path}/dataset/labels.txt"
-        self.model_path = f"{path}/model/fruits.h5"
+        self.model_path = f"{path}/model/output_model.h5"
         self.classes = self.read_labels(self.labels_path)
         self.model = keras.models.load_model(self.model_path)
 
@@ -26,7 +26,7 @@ class Classifier:
         labelsfile.close()
         return classes
 
-    def class_detect(self, img, ):
+    def class_detect(self, img):
         # resize image
         size = (224, 224)
         img = cv2.resize(img, size)
@@ -41,8 +41,10 @@ class Classifier:
 
         # load the image into the array
         data[0] = normalized_image_array
+
         # run the inference
         prediction = self.model.predict(data)
+
         class_number = np.argmax(prediction)
 
         confidence = []

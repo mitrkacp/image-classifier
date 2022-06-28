@@ -1,4 +1,4 @@
-import tensorflow.keras
+import keras
 import cv2
 import numpy as np
 import os
@@ -33,7 +33,8 @@ def main():
             org=(25, 25),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
             fontScale=1.0,
-            color=(0, 255, 0)
+            color=(0, 255, 0),
+            thickness=2
         )
         cv2.imshow("Camera", img)
         cv2.waitKey(1)

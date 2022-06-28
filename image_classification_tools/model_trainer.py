@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 from keras.models import load_model
 # Use the Image Data Generator to import the images from the dataset
 from keras.preprocessing.image import ImageDataGenerator
-
+from keras.callbacks import EarlyStopping
 
 class ModelTrainer:
-    def __init__(self, path, img_size=[224, 224], n_epochs=100):
+    def __init__(self, path, img_size=[224, 224], n_epochs=100, baseline_val_accuracy=0.8):
         self.base_path = path
         self.image_size = img_size
         self.training_path = f"{path}\\dataset\\Train"
@@ -22,6 +22,7 @@ class ModelTrainer:
         self.base_model = InceptionV3(input_shape=self.image_size + [3], weights='imagenet', include_top=False)
         self.classes = glob(f"{path}\\dataset\\Train\\*")
         self.epochs = n_epochs
+        self.callbacks = [EarlyStopping(monitor='val_accuracy', baseline=baseline_val_accuracy, patience=0)]
 
     def train(self):
         # freeze existing weights to not train them
@@ -66,11 +67,12 @@ class ModelTrainer:
 
         # fit the model
         result = model.fit_generator(
-            training_set,
+            generator=training_set,
             validation_data=validation_set,
             epochs=self.epochs,
             steps_per_epoch=len(training_set),
-            validation_steps=len(validation_set)
+            validation_steps=len(validation_set),
+            callbacks=self.callbacks
         )
 
         # plot the loss
